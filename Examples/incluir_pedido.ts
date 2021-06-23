@@ -1,11 +1,10 @@
-import * as index from '../src';
+import incluirPedido from '../src';
 import * as Pedido from '../data/Pedido';
 
 
-console.log(index.incluirPedido({
-    token:'asdsdasdad',
-    Pedido: Pedido.data
-}))
-
-
-
+incluirPedido(
+    {
+        token:"a8sdyh1p23unbh"
+    }, 
+    Pedido.data
+);

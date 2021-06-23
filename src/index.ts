@@ -1,5 +1,5 @@
 import axios from 'axios';
-import * as incluir from '../lib/incluir_pedido';
+import clientAxios from '../lib/clientAxios';
 
 export interface ResponseItem{
     name:string,
@@ -7,12 +7,10 @@ export interface ResponseItem{
 }
 
 export interface Token{
-    token: string,
-    Pedido: {}
-    
+    token: string;
 }
 
-export interface IncluirPedido {
+export interface IPedido {
     conteudo: string,
     pedido: string[],
     totPeso: number,//double
@@ -62,50 +60,69 @@ export interface IncluirPedido {
         email: string,
         contato: string
     },
-    dfe: [
-        {
+    dfe: {
             cfop: number,
             danfeCte: number,
             nrDoc: number,
             serie: number,
             tpDocumento: number,
             valor: number //double
-        },
-        {
-            cfop: number,
-            danfeCte: number,
-            nrDoc: number,
-            serie: number,
-            tpDocumento: number,
-            valor: number //string
-        }
-    ],
-    volume: [
-        {
+        }[],
+    volume:{
             altura: number,
             comprimento: number,
             identificador: number,
             largura: number,
             peso: number //double
-        },
-        {
-            altura: number,
-            comprimento: number,
-            identificador: number,
-            largura: number,
-            peso: number //double
-        }
-    ]
+        }[]
+    
+}
+
+interface Iidentify{
+    identify: string;
+}
+interface Icodigo{
+    codigo: string;
 }
 
 
-const incluirPedido =  (token: Token): Promise<ResponseItem> => {
-    const numberToken = token.token
-
-
+const incluirPedido =  (token: Token, pedido:{}): Promise<ResponseItem> => {    
+    
     return new Promise((resolve, reject)=>{
-         incluir.enviar(numberToken, token.Pedido);
+        clientAxios(token).post('pedido/incluir', pedido).then((res)=>{
+            
+            console.log(res.data);
+        }).catch((err)=>{
+            console.log("Deu errado!")
+            console.log(err);
+        });
     })
    
 };
-export {incluirPedido};
+const cancelarPedido = (token: Token, Identify: Iidentify): Promise<ResponseItem> =>{
+    
+    return new Promise((resolve, reject)=>{
+
+        clientAxios(token).post('pedido/cancelar', Identify).then((res)=>{    
+            console.log(res.data);
+        }).catch((err)=>{
+            console.log("Deu errado!")
+            console.log(err);
+        });
+    })
+};  
+
+const rastrear = (token: Token, codigo: Icodigo): Promise<ResponseItem>=>{
+
+    return new Promise((resolve, reject)=>{
+        
+        clientAxios(token).post('tracking/consultar', codigo).then((res)=>{    
+            console.log(res.data);
+        }).catch((err)=>{
+            console.log("Deu errado!")
+            console.log(err);
+        });
+    })
+}
+
+export default incluirPedido;
