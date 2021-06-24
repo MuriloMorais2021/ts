@@ -1,15 +1,19 @@
-import * as cancelar from '../src/cancelar';
+import cancelarPedido from '../src/';
 
 //podera escolher algum desses meios para cancelar
 const data = {
     codigo: {
         codigo: "123456"
-    }, 
-    shipment:{
+    },
+    shipment: {
         shipmentId: "00000000000000"
     }
 }
-console.log(cancelar.cancel({
-    Token: 'asdsdasdad',
-    codigo: data.codigo
-}));
+// cancelarPedido(
+//     {
+//         token: 'a8sdyh1p23unbh'
+//     }, 
+//     {
+//         shipmentId: "00000000000000"
+//     }
+// );

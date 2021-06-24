@@ -5,7 +5,6 @@ interface IClientAxios{
 }
 
 const clientAxios = ({token}: IClientAxios): AxiosInstance =>{
-    console.log('token config -> '+ token)
     return axios.create({
         baseURL: 'http://www.jadlog.com.br/embarcador/api/',
         headers:{

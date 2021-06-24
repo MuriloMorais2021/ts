@@ -1,126 +1,189 @@
 import axios from 'axios';
 import clientAxios from '../lib/clientAxios';
 
-export interface ResponseItem{
-    name:string,
-    value?:string
+export interface ResponseItem {
+    name: string,
+    value?: string
 }
 
-export interface Token{
+export interface IToken {
     token: string;
 }
 
 export interface IPedido {
-    conteudo: string,
-    pedido: string[],
-    totPeso: number,//double
-    totValor: number,//double
-    obs: string,
-    modalidade: number,//integer
-    contaCorrente: string,
-    tpColeta: string,
-    tipoFrete: number,//integer
-    cdUnidadeOri: string,
-    cdUnidadeDes: string,
-    cdPickupOri: string,
-    cdPickupDes: string,
-    nrContrato: number,//integer
-    servico: number,//integer
-    shipmentId: string,
-    vlColeta: number,//double
+    conteudo: string;
+    pedido: string[];
+    totPeso: number;
+    totValor: number;
+    obs: string;
+    modalidade: number;
+    contaCorrente: string;
+    tpColeta: string;
+    tipoFrete: number;
+    cdUnidadeOri: string;
+    cdUnidadeDes?: null;
+    cdPickupOri?: null;
+    cdPickupDes: string;
+    nrContrato: number;
+    servico: number;
+    shipmentId?: null;
+    vlColeta?: null;
     rem: {
-        nome: string,
-        cnpjCpf: number,
-        ie: null,
-        endereco: string,
-        numero: number,
-        compl: null,
-        bairro: string,
-        cidade: string,
-        uf: string,
-        cep: number,
-        fone: number,
-        cel: number,
-        email: string,
-        contato: string
-    },
+        nome: string;
+        cnpjCpf: string;
+        ie?: null;
+        endereco: string;
+        numero: string;
+        compl?: null;
+        bairro: string;
+        cidade: string;
+        uf: string;
+        cep: string;
+        fone: string;
+        cel: string;
+        email: string;
+        contato: string;
+    };
     des: {
-        nome: string,
-        cnpjCpf: number,
-        ie: null,
-        endereco: string,
-        numero: number,
-        compl: string,
-        bairro: string,
-        cidade: string,
-        uf: string,
-        cep: number,
-        fone: number,
-        cel: number,
-        email: string,
-        contato: string
-    },
+        nome: string;
+        cnpjCpf: string;
+        ie?: null;
+        endereco: string;
+        numero: string;
+        compl?: null;
+        bairro: string;
+        cidade: string;
+        uf: string;
+        cep: string;
+        fone: string;
+        cel: string;
+        email: string;
+        contato: string;
+    };
     dfe: {
-            cfop: number,
-            danfeCte: number,
-            nrDoc: number,
-            serie: number,
-            tpDocumento: number,
-            valor: number //double
-        }[],
-    volume:{
-            altura: number,
-            comprimento: number,
-            identificador: number,
-            largura: number,
-            peso: number //double
-        }[]
-    
+        cfop: string;
+        danfeCte: string;
+        nrDoc: string;
+        serie: string;
+        tpDocumento: number;
+        valor: number
+    }[];
+    volume: {
+        altura: number;
+        comprimento: number;
+        identificador: string;
+        largura: number;
+        peso: number;
+    }[];
+
 }
 
-interface Iidentify{
-    identify: string;
+interface Iidentify {
+    shipmentId: string;
 }
-interface Icodigo{
+
+interface Icodigo {
     codigo: string;
 }
 
+interface IResponsePedido {
+    codigo: string;
+    shipmentId: string;
+    status: string;
+    etiqueta: {
+        arquivo: string;
+        volume: {
+            codbarra: string;
+            lastMile: string;
+            posicao: string;
+            prioridade: number;
+            rota: string;
+            rua: string;
+            seqVolume: number;
+            unidadeDestino: string;
+        }[];
+    };
+}
+interface IresponseCancel {
+    shipmentId: string,
+    status: string
+}
 
-const incluirPedido =  (token: Token, pedido:{}): Promise<ResponseItem> => {    
-    
-    return new Promise((resolve, reject)=>{
-        clientAxios(token).post('pedido/incluir', pedido).then((res)=>{
-            
-            console.log(res.data);
-        }).catch((err)=>{
-            console.log("Deu errado!")
-            console.log(err);
+
+const incluirPedido = (token: IToken, pedido: IPedido): Promise<IResponsePedido> => {
+
+    return new Promise((resolve, reject) => {
+        clientAxios(token).post('pedido/incluir', pedido).then((res) => {
+
+            if (res.data.erro) {
+                return reject(
+                    new Error(`Erro -> ${res.data.erro}`)
+                );
+            }
+            return resolve({
+                codigo: res.data.codigo,
+                shipmentId: res.data.shipmentId,
+                status: res.data.status,
+                etiqueta: {
+                    arquivo: res.data.arquivo,
+                    volume: [{
+                        codbarra: res.data.codbarra,
+                        lastMile: res.data.lastMile,
+                        posicao: res.data.posicao,
+                        prioridade: res.data.prioridade,
+                        rota: res.data.rota,
+                        rua: res.data.rua,
+                        seqVolume: res.data.seqVolume,
+                        unidadeDestino: res.data.unidadeDestino
+                    }]
+                }
+            });
+        }).catch((err) => {
+            console.log(err.response.data);
         });
     })
-   
+
 };
-const cancelarPedido = (token: Token, Identify: Iidentify): Promise<ResponseItem> =>{
-    
-    return new Promise((resolve, reject)=>{
 
-        clientAxios(token).post('pedido/cancelar', Identify).then((res)=>{    
-            console.log(res.data);
-        }).catch((err)=>{
-            console.log("Deu errado!")
-            console.log(err);
+const cancelarPedido = (token: IToken, Identify: Iidentify): Promise<IresponseCancel> => {
+    return new Promise((resolve, reject) => {
+        clientAxios(token).post('pedido/cancelar', Identify).then((res) => {
+            console.log(res);
+            if (res.data.erro) {
+                return reject(
+                    new Error(`Erro -> ${res.data.erro}`)
+                );
+            };
+            return resolve({
+                shipmentId: res.data.shipmentId,
+                status : res.data.status
+            });
+
+        }).catch((err) => {
+            console.log(err.response.data);
         });
-    })
-};  
+    });
+};
 
-const rastrear = (token: Token, codigo: Icodigo): Promise<ResponseItem>=>{
+const rastrear = (token: IToken, codigo: Icodigo): Promise<ResponseItem> => {
 
-    return new Promise((resolve, reject)=>{
-        
-        clientAxios(token).post('tracking/consultar', codigo).then((res)=>{    
+    return new Promise((resolve, reject) => {
+        clientAxios(token).post('tracking/consultar', codigo).then((res) => {
             console.log(res.data);
-        }).catch((err)=>{
+
+            if (res.data.erro) {
+                return reject(
+                    new Error(`Erro -> ${res.data.erro}`)
+                );
+
+            }
+            return resolve({
+                name: "asdsadasd"
+            });
+
+        }).catch((err) => {
             console.log("Deu errado!")
-            console.log(err);
+            console.log(err.response.data);
         });
     })
 }
