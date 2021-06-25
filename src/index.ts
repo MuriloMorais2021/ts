@@ -2,8 +2,10 @@ import axios from 'axios';
 import clientAxios from '../lib/clientAxios';
 
 export interface ResponseItem {
-    name: string,
-    value?: string
+    codigo: string;
+    data: string;
+    status: string;
+    unidade: string
 }
 
 export interface IToken {
@@ -83,7 +85,7 @@ interface Iidentify {
 }
 
 interface Icodigo {
-    codigo: string;
+    codigo: {};
 }
 
 interface IResponsePedido {
@@ -156,7 +158,7 @@ const cancelarPedido = (token: IToken, Identify: Iidentify): Promise<IresponseCa
             };
             return resolve({
                 shipmentId: res.data.shipmentId,
-                status : res.data.status
+                status: res.data.status
             });
 
         }).catch((err) => {
@@ -171,14 +173,64 @@ const rastrear = (token: IToken, codigo: Icodigo): Promise<ResponseItem> => {
         clientAxios(token).post('tracking/consultar', codigo).then((res) => {
             console.log(res.data);
 
-            if (res.data.erro) {
-                return reject(
-                    new Error(`Erro -> ${res.data.erro}`)
-                );
+            //depois a variavel consulta devera receber res.data.consulta
+            //deixei assim apenas para nao dar erro quando ele for percorrer cada item do obj
+            var consulta = [
+                {
+                    cte: "1800000000000",
+                    error: {
+                        id: -1,
+                        descricao: "Nao localizado."
+                    }
+                },
+                {
+                    cte: "1800000000002",
+                    tracking: {
+                        codigo: "1800000000002",
+                        shipmentId: "00000000000000",
+                        dacte: "000000000000000000000000000000000000000000000",
+                        dtEmissao: "19/04/2018",
+                        status: "EMISSAO",
+                        valor: 32.75,
+                        peso: 20,
+                        eventos: [
+                            {
+                                data: "2018-04-19 20:33:39",
+                                status: "EMISSAO",
+                                unidade: "JADLOG SEDE"
+                            }
+                        ],
+                        volumes: [
+                            {
+                                peso: 12,
+                                altura: 0,
+                                largura: 0,
+                                comprimento: 0
+                            },
+                            {
+                                peso: 12,
+                                altura: 0,
+                                largura: 0,
+                                comprimento: 0
+                            }
+                        ]
+                    }
+                }
+            ];
 
-            }
-            return resolve({
-                name: "asdsadasd"
+            consulta.map((item) => {
+                if (item.error) {
+                    return reject({
+                        error: item
+                    });
+                } else {
+                    return resolve({
+                        codigo: item.tracking.codigo,
+                        data: item.tracking.eventos[0].data,
+                        status: item.tracking.eventos[0].status,
+                        unidade: item.tracking.eventos[0].unidade
+                    });
+                }
             });
 
         }).catch((err) => {

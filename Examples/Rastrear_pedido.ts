@@ -1,4 +1,4 @@
-import * as rastrear from '../src/rastrear';
+import rastrear from '../src';
 
 //consulta por pedido
 const data = {
@@ -15,7 +15,11 @@ const data = {
     ]
 }
 
-rastrear.rastreio({
-    Token: 'asdsasdasd',
-    codigo: data
-});
+rastrear(
+    {
+        token: 'a8sdyh1p23unbh'
+    }, 
+    {
+        codigo: data 
+    }
+);
